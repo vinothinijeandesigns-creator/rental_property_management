@@ -9,6 +9,9 @@ import 'quick_actions/collect_rent_dialog.dart';
 import 'quick_actions/record_eb_dialog.dart';
 import 'quick_actions/maintenance_dialog.dart';
 import '../utils/app_snackbar.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+import 'login_screen.dart';
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -262,8 +265,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
               );
               _loadData(); // Refresh avatar and name after returning
             } else if (value == 'logout') {
-              await _supabaseService.signOut();
-              // Routing is handled automatically by AuthGate
+              final navigator = Navigator.of(context);
+              final auth = context.read<AuthProvider>();
+              try {
+                await auth.signOut();
+              } catch (_) {
+                await _supabaseService.signOut();
+              }
+              navigator.pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
             }
           },
           itemBuilder: (context) => [
